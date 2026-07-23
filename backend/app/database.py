@@ -1,10 +1,13 @@
 import os
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
+load_dotenv()
+
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://fantasy_user:fantasy_pass@localhost:5432/fantasy_hockey",
+    "postgresql://fantasy_user:fantasy_pass@localhost:5433/fantasy_hockey",
 )
 
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)

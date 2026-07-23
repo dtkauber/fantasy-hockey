@@ -8,16 +8,16 @@ import httpx
 BASE_URL = "https://api-web.nhle.com/v1"
 
 TEAM_ABBREVS = [
-    "ANA", "ARI", "BOS", "BUF", "CGY", "CAR", "CHI", "COL", "CBJ", "DAL",
+    "ANA", "BOS", "BUF", "CGY", "CAR", "CHI", "COL", "CBJ", "DAL",
     "DET", "EDM", "FLA", "LAK", "MIN", "MTL", "NSH", "NJD", "NYI", "NYR",
-    "OTT", "PHI", "PIT", "SJS", "SEA", "STL", "TBL", "TOR", "VAN", "VGK",
+    "OTT", "PHI", "PIT", "SJS", "SEA", "STL", "TBL", "TOR", "UTA", "VAN", "VGK",
     "WSH", "WPG",
 ]
 
 
 async def fetch_team_roster(abbrev: str) -> dict:
     """GET /roster/{team}/current -> forwards, defensemen, goalies for a team."""
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
         resp = await client.get(f"{BASE_URL}/roster/{abbrev}/current")
         resp.raise_for_status()
         return resp.json()
@@ -25,7 +25,7 @@ async def fetch_team_roster(abbrev: str) -> dict:
 
 async def fetch_standings_now() -> dict:
     """GET /standings/now -> current standings, used to backfill team metadata."""
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
         resp = await client.get(f"{BASE_URL}/standings/now")
         resp.raise_for_status()
         return resp.json()
@@ -33,7 +33,7 @@ async def fetch_standings_now() -> dict:
 
 async def fetch_schedule(date: str) -> dict:
     """GET /schedule/{YYYY-MM-DD} -> games for a given date (or week starting that date)."""
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
         resp = await client.get(f"{BASE_URL}/schedule/{date}")
         resp.raise_for_status()
         return resp.json()
@@ -41,7 +41,7 @@ async def fetch_schedule(date: str) -> dict:
 
 async def fetch_boxscore(game_id: int) -> dict:
     """GET /gamecenter/{game_id}/boxscore -> per-player stats for a completed game."""
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
         resp = await client.get(f"{BASE_URL}/gamecenter/{game_id}/boxscore")
         resp.raise_for_status()
         return resp.json()
