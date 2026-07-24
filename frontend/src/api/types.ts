@@ -11,8 +11,32 @@ export interface PlayerRanking {
   position: string;
   team_id: number | null;
   games_played: number;
+  goals: number;
+  assists: number;
+  points: number;
+  shots: number;
+  hits: number;
+  blocks: number;
+  pim: number;
   total_points: number;
   points_per_game: number;
+}
+
+export interface PlayerProjection {
+  player_id: number;
+  full_name: string;
+  position: string;
+  team_id: number | null;
+  games_played: number;
+  projected_goals_per_82: number;
+  projected_assists_per_82: number;
+  projected_points_per_82: number;
+  projected_shots_per_82: number;
+  projected_hits_per_82: number;
+  projected_blocks_per_82: number;
+  projected_pim_per_82: number;
+  projected_fantasy_points_per_82: number;
+  projected_fantasy_points_per_game: number;
 }
 
 export interface Team {

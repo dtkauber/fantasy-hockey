@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchRankings, fetchTeams } from '../api/client';
-import type { PlayerRanking, Team } from '../api/types';
+import { fetchProjections, fetchTeams } from '../api/client';
+import type { PlayerProjection, Team } from '../api/types';
 
-const POSITIONS = ['All', 'C', 'L', 'R', 'D', 'G'];
+const POSITIONS = ['All', 'C', 'L', 'R', 'D'];
 
-export function Rankings() {
-  const [rankings, setRankings] = useState<PlayerRanking[]>([]);
+export function Projections() {
+  const [projections, setProjections] = useState<PlayerProjection[]>([]);
   const [teamsById, setTeamsById] = useState<Record<number, Team>>({});
   const [position, setPosition] = useState('All');
   const [search, setSearch] = useState('');
@@ -21,25 +21,29 @@ export function Rankings() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchRankings({ position: position === 'All' ? undefined : position, search: search.trim() || undefined })
-      .then(setRankings)
+    fetchProjections({ position: position === 'All' ? undefined : position, search: search.trim() || undefined })
+      .then(setProjections)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [position, search]);
 
   const rows = useMemo(
     () =>
-      rankings.map((r) => ({
-        ...r,
-        teamAbbrev: r.team_id ? teamsById[r.team_id]?.abbrev ?? '—' : '—',
+      projections.map((p) => ({
+        ...p,
+        teamAbbrev: p.team_id ? teamsById[p.team_id]?.abbrev ?? '—' : '—',
       })),
-    [rankings, teamsById],
+    [projections, teamsById],
   );
 
   return (
-    <div className="rankings">
+    <div className="projections">
       <p className="subtitle">
-        Ranked by fantasy points scored so far this season (default scoring: 3/goal, 2/assist, 4/win, etc.)
+        Skaters only. Each stat is this player's own rate blended with their position's league
+        average, weighted by games played -- more games played this season means we trust their
+        own rate more; a short, injury-shortened season gets pulled harder toward the average.
+        Totals assume a full 82-game season. This is a stabilized read on current performance, not
+        a forecast of improvement or decline.
       </p>
 
       <div className="controls">
@@ -59,7 +63,7 @@ export function Rankings() {
       </div>
 
       {error && <p className="error">Error: {error}</p>}
-      {loading && <p>Loading rankings…</p>}
+      {loading && <p>Loading projections…</p>}
 
       {!loading && !error && (
         <div className="table-scroll">
@@ -71,15 +75,14 @@ export function Rankings() {
               <th>Pos</th>
               <th>Team</th>
               <th>GP</th>
-              <th>G</th>
-              <th>A</th>
-              <th>PTS</th>
-              <th>SOG</th>
-              <th>HIT</th>
-              <th>BLK</th>
-              <th>PIM</th>
-              <th>FP</th>
-              <th>FP/GP</th>
+              <th>Proj G</th>
+              <th>Proj A</th>
+              <th>Proj PTS</th>
+              <th>Proj SOG</th>
+              <th>Proj HIT</th>
+              <th>Proj BLK</th>
+              <th>Proj FP</th>
+              <th>Proj FP/GP</th>
             </tr>
           </thead>
           <tbody>
@@ -90,22 +93,19 @@ export function Rankings() {
                 <td>{r.position}</td>
                 <td>{r.teamAbbrev}</td>
                 <td>{r.games_played}</td>
-                <td>{r.goals}</td>
-                <td>{r.assists}</td>
-                <td>{r.points}</td>
-                <td>{r.shots}</td>
-                <td>{r.hits}</td>
-                <td>{r.blocks}</td>
-                <td>{r.pim}</td>
-                <td>{r.total_points.toFixed(1)}</td>
-                <td>{r.points_per_game.toFixed(2)}</td>
+                <td>{r.projected_goals_per_82}</td>
+                <td>{r.projected_assists_per_82}</td>
+                <td>{r.projected_points_per_82}</td>
+                <td>{r.projected_shots_per_82}</td>
+                <td>{r.projected_hits_per_82}</td>
+                <td>{r.projected_blocks_per_82}</td>
+                <td>{r.projected_fantasy_points_per_82.toFixed(1)}</td>
+                <td>{r.projected_fantasy_points_per_game.toFixed(2)}</td>
               </tr>
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={14}>
-                  No ranked players yet — historical stats may not be synced. Run a season sync first.
-                </td>
+                <td colSpan={13}>No projections available — historical stats may not be synced.</td>
               </tr>
             )}
           </tbody>

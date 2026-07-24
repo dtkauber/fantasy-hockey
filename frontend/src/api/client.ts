@@ -1,4 +1,4 @@
-import type { DraftPick, FantasyTeam, League, OnTheClock, Player, PlayerRanking, Team } from './types';
+import type { DraftPick, FantasyTeam, League, OnTheClock, Player, PlayerProjection, PlayerRanking, Team } from './types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000';
 
@@ -44,6 +44,14 @@ export function fetchRankings(params: { position?: string; search?: string } = {
   if (params.search) query.set('search', params.search);
   query.set('limit', '150');
   return get<PlayerRanking[]>(`/players/rankings?${query.toString()}`);
+}
+
+export function fetchProjections(params: { position?: string; search?: string } = {}) {
+  const query = new URLSearchParams();
+  if (params.position) query.set('position', params.position);
+  if (params.search) query.set('search', params.search);
+  query.set('limit', '150');
+  return get<PlayerProjection[]>(`/players/projections?${query.toString()}`);
 }
 
 export function fetchPlayer(playerId: number) {

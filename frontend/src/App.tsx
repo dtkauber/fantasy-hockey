@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Rankings } from './components/Rankings';
+import { Projections } from './components/Projections';
 import { PlayerPool } from './components/PlayerPool';
 import { LeagueManager } from './components/LeagueManager';
 import './App.css';
 
-type Tab = 'rankings' | 'players' | 'leagues';
+type Tab = 'rankings' | 'projections' | 'players' | 'leagues';
 
 function App() {
   const [tab, setTab] = useState<Tab>('rankings');
@@ -16,6 +17,9 @@ function App() {
         <button className={tab === 'rankings' ? 'active' : ''} onClick={() => setTab('rankings')}>
           Rankings
         </button>
+        <button className={tab === 'projections' ? 'active' : ''} onClick={() => setTab('projections')}>
+          Projections
+        </button>
         <button className={tab === 'players' ? 'active' : ''} onClick={() => setTab('players')}>
           Players
         </button>
@@ -24,6 +28,7 @@ function App() {
         </button>
       </nav>
       {tab === 'rankings' && <Rankings />}
+      {tab === 'projections' && <Projections />}
       {tab === 'players' && <PlayerPool />}
       {tab === 'leagues' && <LeagueManager />}
     </div>

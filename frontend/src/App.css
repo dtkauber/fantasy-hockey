@@ -46,10 +46,19 @@
   padding: 0.5rem;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;
+  white-space: nowrap;
+}
+
+.table-scroll table {
+  margin-bottom: 0;
 }
 
 th,
