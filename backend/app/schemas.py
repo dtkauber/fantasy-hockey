@@ -18,8 +18,32 @@ class PlayerRankingOut(BaseModel):
     position: str
     team_id: int | None = None
     games_played: int
+    goals: int
+    assists: int
+    points: int
+    shots: int
+    hits: int
+    blocks: int
+    pim: int
     total_points: float
     points_per_game: float
+
+
+class PlayerProjectionOut(BaseModel):
+    player_id: int
+    full_name: str
+    position: str
+    team_id: int | None = None
+    games_played: int
+    projected_goals_per_82: float
+    projected_assists_per_82: float
+    projected_points_per_82: float
+    projected_shots_per_82: float
+    projected_hits_per_82: float
+    projected_blocks_per_82: float
+    projected_pim_per_82: float
+    projected_fantasy_points_per_82: float
+    projected_fantasy_points_per_game: float
 
 
 class TeamOut(BaseModel):
