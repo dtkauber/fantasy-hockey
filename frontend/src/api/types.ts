@@ -20,6 +20,8 @@ export interface PlayerRanking {
   pim: number;
   total_points: number;
   points_per_game: number;
+  consistency_stddev: number;
+  boom_bust_ratio: number;
 }
 
 export interface PlayerProjection {
@@ -43,6 +45,8 @@ export interface Team {
   team_id: number;
   abbrev: string;
   name: string;
+  conference: string | null;
+  division: string | null;
 }
 
 export interface League {

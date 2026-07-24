@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchPlayers, fetchTeams } from '../api/client';
 import type { Player, Team } from '../api/types';
+import { PositionBadge } from './PositionBadge';
 
 const POSITIONS = ['All', 'C', 'L', 'R', 'D', 'G'];
 
@@ -75,7 +76,9 @@ export function PlayerPool() {
             {rows.map((p) => (
               <tr key={p.player_id}>
                 <td>{p.full_name}</td>
-                <td>{p.position}</td>
+                <td>
+                  <PositionBadge position={p.position} />
+                </td>
                 <td>{p.teamAbbrev}</td>
               </tr>
             ))}

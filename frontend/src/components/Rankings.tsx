@@ -1,21 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchRankings, fetchTeams } from '../api/client';
 import type { PlayerRanking, Team } from '../api/types';
+import { FilterBar } from './FilterBar';
+import { PositionBadge } from './PositionBadge';
+import { SortableTh } from './SortableTh';
+import { useSort } from '../hooks/useSort';
 
 const POSITIONS = ['All', 'C', 'L', 'R', 'D', 'G'];
+const RANK_MEDAL = ['rank-1', 'rank-2', 'rank-3'];
+
+type Row = PlayerRanking & { teamAbbrev: string };
 
 export function Rankings() {
   const [rankings, setRankings] = useState<PlayerRanking[]>([]);
-  const [teamsById, setTeamsById] = useState<Record<number, Team>>({});
+  const [teams, setTeams] = useState<Team[]>([]);
   const [position, setPosition] = useState('All');
+  const [division, setDivision] = useState('All');
+  const [teamId, setTeamId] = useState('All');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchTeams()
-      .then((teams) => setTeamsById(Object.fromEntries(teams.map((t) => [t.team_id, t]))))
-      .catch((err) => setError(err.message));
+    fetchTeams().then(setTeams).catch((err) => setError(err.message));
   }, []);
 
   useEffect(() => {
@@ -27,89 +34,102 @@ export function Rankings() {
       .finally(() => setLoading(false));
   }, [position, search]);
 
-  const rows = useMemo(
+  const teamsById = useMemo(() => Object.fromEntries(teams.map((t) => [t.team_id, t])), [teams]);
+
+  const filteredRows: Row[] = useMemo(
     () =>
-      rankings.map((r) => ({
-        ...r,
-        teamAbbrev: r.team_id ? teamsById[r.team_id]?.abbrev ?? '—' : '—',
-      })),
-    [rankings, teamsById],
+      rankings
+        .map((r) => ({ ...r, teamAbbrev: r.team_id ? teamsById[r.team_id]?.abbrev ?? '—' : '—' }))
+        .filter((r) => (teamId === 'All' ? true : String(r.team_id) === teamId))
+        .filter((r) => (division === 'All' ? true : teamsById[r.team_id ?? -1]?.division === division)),
+    [rankings, teamsById, teamId, division],
   );
+
+  const { sorted, sortKey, sortDir, toggleSort } = useSort<Row>(filteredRows, 'total_points', 'desc');
 
   return (
     <div className="rankings">
       <p className="subtitle">
         Ranked by fantasy points scored so far this season (default scoring: 3/goal, 2/assist, 4/win, etc.)
+        Click any column to sort.
       </p>
 
-      <div className="controls">
-        <input
-          type="text"
-          placeholder="Search players..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select value={position} onChange={(e) => setPosition(e.target.value)}>
-          {POSITIONS.map((pos) => (
-            <option key={pos} value={pos}>
-              {pos}
-            </option>
-          ))}
-        </select>
-      </div>
+      <FilterBar
+        search={search}
+        onSearchChange={setSearch}
+        position={position}
+        onPositionChange={setPosition}
+        positions={POSITIONS}
+        teams={teams}
+        teamId={teamId}
+        onTeamChange={setTeamId}
+        division={division}
+        onDivisionChange={setDivision}
+      />
 
       {error && <p className="error">Error: {error}</p>}
       {loading && <p>Loading rankings…</p>}
 
       {!loading && !error && (
         <div className="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Pos</th>
-              <th>Team</th>
-              <th>GP</th>
-              <th>G</th>
-              <th>A</th>
-              <th>PTS</th>
-              <th>SOG</th>
-              <th>HIT</th>
-              <th>BLK</th>
-              <th>PIM</th>
-              <th>FP</th>
-              <th>FP/GP</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r, i) => (
-              <tr key={r.player_id}>
-                <td>{i + 1}</td>
-                <td>{r.full_name}</td>
-                <td>{r.position}</td>
-                <td>{r.teamAbbrev}</td>
-                <td>{r.games_played}</td>
-                <td>{r.goals}</td>
-                <td>{r.assists}</td>
-                <td>{r.points}</td>
-                <td>{r.shots}</td>
-                <td>{r.hits}</td>
-                <td>{r.blocks}</td>
-                <td>{r.pim}</td>
-                <td>{r.total_points.toFixed(1)}</td>
-                <td>{r.points_per_game.toFixed(2)}</td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
+          <table>
+            <thead>
               <tr>
-                <td colSpan={14}>
-                  No ranked players yet — historical stats may not be synced. Run a season sync first.
-                </td>
+                <th>#</th>
+                <SortableTh label="Name" active={sortKey === 'full_name'} dir={sortDir} onClick={() => toggleSort('full_name')} />
+                <th>Pos</th>
+                <th>Team</th>
+                <SortableTh label="GP" active={sortKey === 'games_played'} dir={sortDir} onClick={() => toggleSort('games_played')} />
+                <SortableTh label="G" active={sortKey === 'goals'} dir={sortDir} onClick={() => toggleSort('goals')} />
+                <SortableTh label="A" active={sortKey === 'assists'} dir={sortDir} onClick={() => toggleSort('assists')} />
+                <SortableTh label="PTS" active={sortKey === 'points'} dir={sortDir} onClick={() => toggleSort('points')} />
+                <SortableTh label="SOG" active={sortKey === 'shots'} dir={sortDir} onClick={() => toggleSort('shots')} />
+                <SortableTh label="HIT" active={sortKey === 'hits'} dir={sortDir} onClick={() => toggleSort('hits')} />
+                <SortableTh label="BLK" active={sortKey === 'blocks'} dir={sortDir} onClick={() => toggleSort('blocks')} />
+                <SortableTh label="PIM" active={sortKey === 'pim'} dir={sortDir} onClick={() => toggleSort('pim')} />
+                <SortableTh label="FP" active={sortKey === 'total_points'} dir={sortDir} onClick={() => toggleSort('total_points')} />
+                <SortableTh label="FP/GP" active={sortKey === 'points_per_game'} dir={sortDir} onClick={() => toggleSort('points_per_game')} />
+                <SortableTh
+                  label="Boom/Bust"
+                  active={sortKey === 'boom_bust_ratio'}
+                  dir={sortDir}
+                  onClick={() => toggleSort('boom_bust_ratio')}
+                />
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {sorted.map((r, i) => (
+                <tr key={r.player_id}>
+                  <td className={RANK_MEDAL[i] ? `rank-medal ${RANK_MEDAL[i]}` : ''}>{i + 1}</td>
+                  <td>{r.full_name}</td>
+                  <td>
+                    <PositionBadge position={r.position} />
+                  </td>
+                  <td>{r.teamAbbrev}</td>
+                  <td>{r.games_played}</td>
+                  <td>{r.goals}</td>
+                  <td>{r.assists}</td>
+                  <td>{r.points}</td>
+                  <td>{r.shots}</td>
+                  <td>{r.hits}</td>
+                  <td>{r.blocks}</td>
+                  <td>{r.pim}</td>
+                  <td>{r.total_points.toFixed(1)}</td>
+                  <td>{r.points_per_game.toFixed(2)}</td>
+                  <td title="Coefficient of variation of per-game fantasy points -- lower means more consistent week to week">
+                    {r.boom_bust_ratio.toFixed(2)}
+                  </td>
+                </tr>
+              ))}
+              {sorted.length === 0 && (
+                <tr>
+                  <td colSpan={15}>
+                    No ranked players match these filters — historical stats may not be synced yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -38,11 +38,11 @@ export function fetchTeams() {
   return get<Team[]>('/teams');
 }
 
-export function fetchRankings(params: { position?: string; search?: string } = {}) {
+export function fetchRankings(params: { position?: string; search?: string; limit?: number } = {}) {
   const query = new URLSearchParams();
   if (params.position) query.set('position', params.position);
   if (params.search) query.set('search', params.search);
-  query.set('limit', '150');
+  query.set('limit', String(params.limit ?? 150));
   return get<PlayerRanking[]>(`/players/rankings?${query.toString()}`);
 }
 
