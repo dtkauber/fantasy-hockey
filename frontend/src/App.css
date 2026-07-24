@@ -1,7 +1,34 @@
 .app {
-  max-width: 720px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1rem;
+}
+
+.subtitle {
+  color: #666;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.tabs button {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tabs button.active {
+  border-bottom-color: #333;
+  font-weight: 600;
 }
 
 .controls {
@@ -22,6 +49,7 @@
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 1.5rem;
 }
 
 th,
@@ -33,4 +61,63 @@ td {
 
 .error {
   color: #b00020;
+}
+
+.league-manager {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.league-picker {
+  flex: 0 0 220px;
+}
+
+.league-detail {
+  flex: 1;
+  min-width: 0;
+}
+
+.league-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.league-list button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.25rem;
+  border: 1px solid #ddd;
+  background: none;
+  cursor: pointer;
+}
+
+.league-list button.active {
+  background: #eee;
+  font-weight: 600;
+}
+
+.create-league-form,
+.add-team-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.create-league-form input[type='text'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.create-league-form input[type='number'] {
+  width: 4rem;
+}
+
+.on-the-clock {
+  padding: 0.5rem;
+  background: #fffbe6;
+  border: 1px solid #f0e0a0;
 }
