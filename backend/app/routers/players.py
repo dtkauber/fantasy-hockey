@@ -32,6 +32,7 @@ def player_rankings(
     points_expr = default_points_expr()
     total_points = func.sum(points_expr)
     games_played = func.count(PlayerGameStat.stat_id)
+    points_stddev = func.stddev_samp(points_expr)
 
     q = (
         db.query(
@@ -47,6 +48,7 @@ def player_rankings(
             func.sum(PlayerGameStat.blocks).label("blocks"),
             func.sum(PlayerGameStat.pim).label("pim"),
             total_points.label("total_points"),
+            points_stddev.label("points_stddev"),
         )
         .join(PlayerGameStat, PlayerGameStat.player_id == Player.player_id)
         .join(Game, Game.game_id == PlayerGameStat.game_id)
@@ -59,25 +61,33 @@ def player_rankings(
         q = q.filter(Player.full_name.ilike(f"%{search}%"))
 
     rows = q.order_by(total_points.desc()).limit(limit).all()
-    return [
-        PlayerRankingOut(
-            player_id=r.player_id,
-            full_name=r.full_name,
-            position=r.position,
-            team_id=r.team_id,
-            games_played=r.games_played,
-            goals=r.goals or 0,
-            assists=r.assists or 0,
-            points=(r.goals or 0) + (r.assists or 0),
-            shots=r.shots or 0,
-            hits=r.hits or 0,
-            blocks=r.blocks or 0,
-            pim=r.pim or 0,
-            total_points=round(float(r.total_points or 0), 2),
-            points_per_game=round(float(r.total_points or 0) / r.games_played, 2) if r.games_played else 0.0,
+    results = []
+    for r in rows:
+        ppg = round(float(r.total_points or 0) / r.games_played, 2) if r.games_played else 0.0
+        stddev = float(r.points_stddev or 0)
+        results.append(
+            PlayerRankingOut(
+                player_id=r.player_id,
+                full_name=r.full_name,
+                position=r.position,
+                team_id=r.team_id,
+                games_played=r.games_played,
+                goals=r.goals or 0,
+                assists=r.assists or 0,
+                points=(r.goals or 0) + (r.assists or 0),
+                shots=r.shots or 0,
+                hits=r.hits or 0,
+                blocks=r.blocks or 0,
+                pim=r.pim or 0,
+                total_points=round(float(r.total_points or 0), 2),
+                points_per_game=ppg,
+                consistency_stddev=round(stddev, 2),
+                # coefficient of variation: stddev relative to mean, so it's comparable
+                # across players scoring at very different levels. Lower = more consistent.
+                boom_bust_ratio=round(stddev / ppg, 2) if ppg else 0.0,
+            )
         )
-        for r in rows
-    ]
+    return results
 
 
 @router.get("/projections", response_model=list[PlayerProjectionOut])

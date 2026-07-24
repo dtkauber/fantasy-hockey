@@ -27,6 +27,8 @@ class PlayerRankingOut(BaseModel):
     pim: int
     total_points: float
     points_per_game: float
+    consistency_stddev: float
+    boom_bust_ratio: float
 
 
 class PlayerProjectionOut(BaseModel):
@@ -50,6 +52,8 @@ class TeamOut(BaseModel):
     team_id: int
     abbrev: str
     name: str
+    conference: str | None = None
+    division: str | None = None
 
     class Config:
         from_attributes = True

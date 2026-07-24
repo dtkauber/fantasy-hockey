@@ -23,14 +23,29 @@ async def sync_rosters(db: Session = Depends(get_db)):
     synced_teams = 0
     synced_players = 0
 
+    standings = await nhl_client.fetch_standings_now()
+    team_meta = {
+        entry["teamAbbrev"]["default"]: (
+            entry["teamName"]["default"],
+            entry["conferenceName"],
+            entry["divisionName"],
+        )
+        for entry in standings.get("standings", [])
+    }
+
     for abbrev in nhl_client.TEAM_ABBREVS:
         team = db.query(Team).filter(Team.abbrev == abbrev).first()
+        name, conference, division = team_meta.get(abbrev, (abbrev, None, None))
         if not team:
-            # team_id gets backfilled properly by /sync/standings; placeholder id for now
-            team = Team(team_id=abs(hash(abbrev)) % 100000, abbrev=abbrev, name=abbrev)
+            team = Team(team_id=abs(hash(abbrev)) % 100000, abbrev=abbrev, name=name,
+                        conference=conference, division=division)
             db.add(team)
             db.flush()
             synced_teams += 1
+        else:
+            team.name = name
+            team.conference = conference
+            team.division = division
 
         roster = await nhl_client.fetch_team_roster(abbrev)
         for group in ("forwards", "defensemen", "goalies"):
