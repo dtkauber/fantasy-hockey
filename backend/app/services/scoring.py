@@ -5,7 +5,7 @@ to a specific scoring format on purpose -- every league can weight
 categories differently.
 """
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
+from sqlalchemy import and_, case, func
 from datetime import date
 
 from ..models import PlayerGameStat, Game, ScoringRule, RosterSlot, WeeklyScore
@@ -78,6 +78,27 @@ def _league_id_for_team(db: Session, fantasy_team_id: int) -> int:
     from ..models import FantasyTeam
     team = db.query(FantasyTeam).filter(FantasyTeam.fantasy_team_id == fantasy_team_id).first()
     return team.league_id
+
+
+def default_points_expr():
+    """
+    SQL expression (not a Python value) computing fantasy points per
+    player_game_stats row using DEFAULT_SCORING_RULES -- for aggregate
+    queries like overall player rankings, where doing this row-by-row
+    in Python would mean pulling the whole stats table into memory.
+    """
+    terms = []
+    for rule in DEFAULT_SCORING_RULES:
+        col = getattr(PlayerGameStat, rule["stat_name"])
+        weight = rule["points_per"]
+        if rule["stat_name"] in ("is_win", "is_shutout"):
+            terms.append(case((col.is_(True), weight), else_=0.0))
+        else:
+            terms.append(func.coalesce(col, 0) * weight)
+    expr = terms[0]
+    for term in terms[1:]:
+        expr = expr + term
+    return expr
 
 
 DEFAULT_SCORING_RULES = [

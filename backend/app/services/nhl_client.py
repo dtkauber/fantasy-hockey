@@ -65,18 +65,20 @@ def parse_boxscore_player_stats(boxscore: dict) -> list[dict]:
                     "assists": p.get("assists", 0),
                     "plus_minus": p.get("plusMinus", 0),
                     "pim": p.get("pim", 0),
-                    "shots": p.get("shots", 0),
+                    "shots": p.get("sog", 0),
                     "hits": p.get("hits", 0),
                     "blocks": p.get("blockedShots", 0),
                     "toi_seconds": _toi_to_seconds(p.get("toi", "0:00")),
                 })
         for p in team_stats.get("goalies", []):
+            if p.get("toi", "0:00") == "0:00":
+                continue  # dressed but didn't play
             rows.append({
                 "player_id": p.get("playerId"),
-                "saves": p.get("saveShotsAgainst", "0/0").split("/")[0],
+                "saves": p.get("saves", 0),
                 "goals_against": p.get("goalsAgainst", 0),
                 "is_win": p.get("decision") == "W",
-                "is_shutout": p.get("shutout", 0) == 1,
+                "is_shutout": p.get("decision") == "W" and p.get("goalsAgainst", 1) == 0,
                 "toi_seconds": _toi_to_seconds(p.get("toi", "0:00")),
             })
     return rows
