@@ -85,3 +85,44 @@ export function fetchOnTheClock(leagueId: number) {
 export function makePick(params: { league_id: number; fantasy_team_id: number; player_id: number }) {
   return post<DraftPick>('/draft/pick', params);
 }
+
+export interface ChatTurnParam {
+  role: string;
+  content: string;
+}
+
+export async function* streamDraftAdvice(params: {
+  history: ChatTurnParam[];
+  context: unknown;
+  question: string;
+}): AsyncGenerator<string> {
+  const res = await fetch(`${BASE_URL}/chat/draft-advice`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(params),
+  });
+  if (!res.ok || !res.body) {
+    throw new Error(`draft-advice failed: ${res.status} ${res.statusText}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const events = buffer.split('\n\n');
+    buffer = events.pop() ?? '';
+    for (const event of events) {
+      const line = event.trim();
+      if (!line.startsWith('data: ')) continue;
+      const data = line.slice(6);
+      if (data === '[DONE]') return;
+      const parsed = JSON.parse(data) as { text?: string; error?: string };
+      if (parsed.error) throw new Error(parsed.error);
+      if (parsed.text) yield parsed.text;
+    }
+  }
+}

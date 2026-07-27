@@ -322,7 +322,10 @@ button {
 .controls button,
 .create-league-form button,
 .add-team-form button,
-.draft-board button {
+.draft-board button,
+.draft-helper table button,
+.compare table button,
+.chat-input-row button {
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 6px;
@@ -336,8 +339,16 @@ button {
 .controls button:hover,
 .create-league-form button:hover,
 .add-team-form button:hover,
-.draft-board button:hover {
+.draft-board button:hover,
+.draft-helper table button:hover,
+.compare table button:hover,
+.chat-input-row button:hover {
   opacity: 0.9;
+}
+
+.chat-input-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .on-the-clock {
@@ -364,7 +375,153 @@ button {
   min-width: 220px;
 }
 
+.draft-config {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.9rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 1rem;
+}
+
+.config-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.config-group label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.config-group input[type='number'] {
+  width: 4.5rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.format-toggle {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.format-toggle button {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.format-toggle button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.reset-draft {
+  margin-left: auto;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
 .compare-winner {
   font-weight: 800;
   color: var(--success);
+}
+
+.draft-helper-body {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.draft-helper-body .table-scroll {
+  flex: 1;
+  min-width: 0;
+}
+
+.draft-assistant {
+  flex: 0 0 320px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 1rem;
+}
+
+.draft-assistant h4 {
+  margin: 0 0 0.6rem;
+}
+
+.chat-window {
+  height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  padding-right: 0.25rem;
+}
+
+.chat-empty {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.chat-msg {
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.chat-user {
+  background: var(--primary-light);
+  align-self: flex-end;
+  color: var(--primary);
+}
+
+.chat-assistant {
+  background: var(--bg);
+  align-self: flex-start;
+  border: 1px solid var(--border);
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chat-input-row input {
+  flex: 1;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
 }

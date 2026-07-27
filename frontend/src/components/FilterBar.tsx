@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { Team } from '../api/types';
+import { positionLabel } from '../utils/positions';
 
 export interface FilterBarProps {
   search: string;
@@ -43,7 +44,7 @@ export function FilterBar({
       <select value={position} onChange={(e) => onPositionChange(e.target.value)}>
         {positions.map((pos) => (
           <option key={pos} value={pos}>
-            {pos === 'All' ? 'All positions' : pos}
+            {pos === 'All' ? 'All positions' : positionLabel(pos)}
           </option>
         ))}
       </select>
