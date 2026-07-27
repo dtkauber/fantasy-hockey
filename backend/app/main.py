@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import players, draft, sync, leagues, teams
+from .routers import players, draft, sync, leagues, teams, chat
 
 app = FastAPI(title="Fantasy Hockey Manager API")
 
@@ -17,6 +17,7 @@ app.include_router(draft.router)
 app.include_router(sync.router)
 app.include_router(leagues.router)
 app.include_router(teams.router)
+app.include_router(chat.router)
 
 
 @app.get("/health")
