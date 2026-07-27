@@ -1,10 +1,11 @@
 import json
 import os
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from ..limiter import limiter
 from ..services.chat import stream_draft_advice
 
 router = APIRouter(prefix="/chat", tags=["chat"])
@@ -22,7 +23,8 @@ class ChatRequest(BaseModel):
 
 
 @router.post("/draft-advice")
-async def draft_advice(payload: ChatRequest):
+@limiter.limit("10/minute")
+async def draft_advice(request: Request, payload: ChatRequest):
     if not os.getenv("OPENAI_API_KEY"):
         raise HTTPException(500, "OPENAI_API_KEY is not configured on the server.")
 

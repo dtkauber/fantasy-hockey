@@ -1,0 +1,33 @@
+services:
+  - name: fantasy-hockey-backend
+    type: web
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fantasy-hockey-db
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: FRONTEND_ORIGIN
+        value: https://fantasy-hockey-frontend.onrender.com
+
+  - name: fantasy-hockey-frontend
+    type: web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://fantasy-hockey-backend.onrender.com
+
+databases:
+  - name: fantasy-hockey-db
+    plan: free
