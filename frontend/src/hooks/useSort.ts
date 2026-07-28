@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 export type SortDir = 'asc' | 'desc';
 
-export function useSort<T extends Record<string, unknown>>(
+export function useSort<T extends object>(
   rows: T[],
   defaultKey: keyof T,
   defaultDir: SortDir = 'desc',
