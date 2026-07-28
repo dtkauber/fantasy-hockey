@@ -13,9 +13,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 MODEL = "gpt-4o"
+
+_client: AsyncOpenAI | None = None
+
+
+def _get_client() -> AsyncOpenAI:
+    """Built lazily so a missing key surfaces as a per-request 500
+    (handled in routers/chat.py), not a crash on app startup."""
+    global _client
+    if _client is None:
+        _client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _client
 
 SYSTEM_PROMPT = """You are a fantasy hockey draft assistant. A user is running a mock \
 draft and will ask you things like "who should I draft next", "should I take a \
@@ -59,7 +68,7 @@ async def stream_draft_advice(history: list[dict], context: dict, question: str)
         {"role": "user", "content": _build_user_content(context, question)},
     ]
 
-    stream = await client.chat.completions.create(
+    stream = await _get_client().chat.completions.create(
         model=MODEL,
         messages=messages,
         stream=True,
